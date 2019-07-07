@@ -1,0 +1,123 @@
+Boston
+New York
+Philadelphia
+Roanoke
+Charlotte
+Atlanta
+Los Angeles
+San Francisco
+Honolulu
+Topeka
+Seattle
+
+Boston	New York	120
+Boston	Philadelphia	219
+Philadelphia	New York	225
+Roanoke	New York	320
+Roanoke	Charlotte	150
+Charlotte	Atlanta	176
+New York	Los Angeles	550
+Atlanta	Seattle	444
+Boston	San Francisco	525
+San Francisco	Los Angeles	200
+Seattle	Honolulu	468
+Honolulu	Topeka	543
+Topeka	Seattle	405
+
+/******************************************************************
+     Creates a new network and populates it with data from a file 
+     which contains the cost of flights to various cities. The user
+     enters two cities and the program returns the cheapest path
+     between the two cities.
+   ******************************************************************/
+package jsjf;
+import java.io.*;
+import java.text.NumberFormat;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
+   public static void main (String[] args)
+   {
+      String file = "/Users/richardkaune/NetBeansProjects/GraphTester/src/flights.txt";
+      
+      try 
+      {
+         BufferedReader inFile = new BufferedReader
+                                (new FileReader(file));
+         BufferedReader keyboard = new BufferedReader
+                                  (new InputStreamReader(System.in));
+         Network<String> cities = new Network<String>();
+         StringTokenizer tokenizer;
+         String line, city1, city2;
+         double cost;
+         int numCities;
+      
+         /** Read in the list of cities from the input file and add
+             add them to the network.  List of cities will be 
+             terminated by a blank line. */
+         line = inFile.readLine();
+         while (line.length() != 0)
+         {
+            cities.addVertex(line);
+            line = inFile.readLine();
+         }
+
+         /** Read in the connections between cities from the input
+             file and add them to the network. */
+         line = inFile.readLine();
+         while (line != null)
+         {
+            tokenizer = new StringTokenizer(line, "\t\n");
+            city1 = tokenizer.nextToken();
+            city2 = tokenizer.nextToken();
+            cost = Double.parseDouble(tokenizer.nextToken());
+            cities.addEdge(city1, city2, cost);
+            line = inFile.readLine();
+         }
+
+         /** Display the list of cities */
+         numCities = cities.size();
+         Iterator<String> cityIterator = cities.iteratorBFS(0);
+         
+         System.out.println("Cities");
+         System.out.println("------");
+         while (cityIterator.hasNext())
+         {
+            System.out.println(cityIterator.next());
+         }
+         
+         /** Prompt the user to enter two cities */
+         System.out.print("\nCity 1: ");
+         city1 = keyboard.readLine();
+         System.out.print("\nCity 2: ");
+         city2 = keyboard.readLine();
+         
+         /** Display the shortest path between the two cities and
+             how much it would cost */
+         cost = cities.shortestPathWeight(city1, city2);
+         if (cost < Double.POSITIVE_INFINITY)
+         {
+            System.out.print("\nThe cheapest path from " + city1 + 
+                             " to " + city2 + " is ");
+            NumberFormat money = NumberFormat.getCurrencyInstance();
+            System.out.println(money.format(cities.shortestPathWeight
+                              (city1, city2)));
+            System.out.print("You would have to travel from ");
+            Iterator<String> it = cities.iteratorShortestPath(city1, city2);
+            
+            while (it.hasNext()) 
+            {
+               System.out.println(it.next());
+               if (it.hasNext())
+                  System.out.print(" to ");
+            }
+         }
+         else
+            System.out.println("\nThere is no path from " + city1 + 
+                               " to " + city2);
+      }
+
+      catch (FileNotFoundException e) {System.out.println("file " + file + 
+                                       " not found");}
+      catch (IOException e) {System.out.println("IO exception");}
+   }
